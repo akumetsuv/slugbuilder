@@ -7,6 +7,9 @@ RUN useradd slugbuilder --home-dir /app
 RUN mkdir /app
 RUN chown -R slugbuilder:slugbuilder /app
 
+RUN apt-get update
+RUN apt-get install -y libicu-dev
+
 ADD ./builder/ /tmp/builder
 RUN xargs -L 1 /tmp/builder/install-buildpack /tmp/buildpacks < /tmp/builder/buildpacks.txt
 ENTRYPOINT ["/tmp/builder/build.sh"]
