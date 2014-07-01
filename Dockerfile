@@ -10,7 +10,6 @@ RUN chown -R slugbuilder:slugbuilder /app
 RUN apt-get update
 RUN apt-get install -y libicu-dev
 
-RUN DATABASE_URL=postgres://user:pass@127.0.0.1/does_not_exist_dbname
 
 ADD ./builder/ /tmp/builder
 RUN xargs -L 1 /tmp/builder/install-buildpack /tmp/buildpacks < /tmp/builder/buildpacks.txt
