@@ -9,6 +9,7 @@ RUN chown -R slugbuilder:slugbuilder /app
 
 RUN apt-get update
 RUN apt-get install -y libicu-dev
+RUN apt-get install -y sudo
 
 
 ADD ./builder/ /tmp/builder
