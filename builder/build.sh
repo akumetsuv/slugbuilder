@@ -33,22 +33,22 @@ function output_redirect() {
 }
 
 function echo_title() {
-  echo $'\e[1G----->' $* | output_redirect
+	echo $'\e[1G----->' $* | output_redirect
 }
 
 function echo_normal() {
-  echo $'\e[1G      ' $* | output_redirect
+	echo $'\e[1G      ' $* | output_redirect
 }
 
 function ensure_indent() {
-  while read line; do
-    if [[ "$line" == --* ]]; then
-      echo $'\e[1G'$line | output_redirect
-    else
-      echo $'\e[1G      ' "$line" | output_redirect
-    fi
+	while read line; do
+		if [[ "$line" == --* ]]; then
+			echo $'\e[1G'$line | output_redirect
+		else
+			echo $'\e[1G      ' "$line" | output_redirect
+		fi
 
-  done 
+	done
 }
 
 cd $app_dir
@@ -80,9 +80,9 @@ if [[ -n "$BUILDPACK_URL" ]]; then
 	selected_buildpack="$buildpack"
 	buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack
 else
-    for buildpack in "${buildpacks[@]}"; do
-    	buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack && break
-    done
+		for buildpack in "${buildpacks[@]}"; do
+			buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack && break
+		done
 fi
 
 if [[ -n "$selected_buildpack" ]]; then
@@ -94,11 +94,17 @@ fi
 
 ## Get ENV_DIR files
 
-curl -0 -s "$env_url" | tar x -C "$env_dir"
+if [[ -n "$env_url" ]]; then
+	curl -0 -s "$env_url" | tar x -C "$env_dir"
+fi
 
 ## Buildpack compile
 
-$selected_buildpack/bin/compile "$build_root" "$cache_root" "$env_dir" | ensure_indent
+if [[ -n "$env_url" ]]; then
+	$selected_buildpack/bin/compile "$build_root" "$cache_root" "$env_dir" | ensure_indent
+else
+	$selected_buildpack/bin/compile "$build_root" "$cache_root" | ensure_indent
+fi
 
 $selected_buildpack/bin/release "$build_root" "$cache_root" > $build_root/.release
 
@@ -123,12 +129,12 @@ if [[ -f "$build_root/.slugignore" ]]; then
 else
 	tar --exclude='.git' --use-compress-program=pigz -C $build_root -cf $slug_file . | cat
 fi
-  
+
 if [[ "$slug_file" != "-" ]]; then
 	slug_size=$(du -Sh "$slug_file" | cut -f1)
 	echo_title "Compiled slug size is $slug_size"
 
 	if [[ $put_url ]]; then
-		curl -0 -s -o /dev/null -X PUT -T $slug_file "$put_url" 
+		curl -0 -s -o /dev/null -X PUT -T $slug_file "$put_url"
 	fi
 fi
